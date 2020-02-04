@@ -4,20 +4,20 @@ scriptFile = mfilename('fullpath');
 
 %% Add paths for ASR
 thisPath = [scriptFolder filesep 'ASR'];
-addpath(genPath(thisPath));
+addpath(genpath(thisPath));
 
 %% Add paths for ASR_Alt
 thisPath = [scriptFolder filesep 'ASR_Alt'];
-addpath(genPath(thisPath));
+addpath(genpath(thisPath));
 
 %% Add paths for LARG
 thisPath = [scriptFolder filesep 'LARG'];
-addpath(genPath(thisPath));
+addpath(genpath(thisPath));
 
 %% Add paths for MARA
 thisPath = [scriptFolder filesep 'MARA'];
-addpath(genPath(thisPath));
+addpath(genpath(thisPath));
 
 %% Add paths to utilities
 thisPath = [scriptFolder filesep 'utilities'];
-addpath(genPath(thisPath));
+addpath(genpath(thisPath));
