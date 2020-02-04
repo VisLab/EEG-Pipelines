@@ -37,7 +37,7 @@ for m = 1:length(chanMask)
         chanMask(m) = false;
     end
 end
-EEG.chanlocs = chanlocs(chanMask);
+EEG.chanlocs = EEG.chanlocs(chanMask);
 EEG.data = EEG.data(chanMask, :);
 EEG.nbchan = sum(chanMask);
 
