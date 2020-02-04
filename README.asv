@@ -46,8 +46,7 @@ Add this directory to your path as well.
 The input EEG.set file MUST have channel locations. Furthermore, the 
 EEG.chanlocs.type fields must be set so that the EEG channels have the
 type 'EEG'. The default parameters for PREP, Blinker, MARA and other tools
-rely on being able to reliably distinguish the EEG channels from auxilliary
-channels in the analysis.
+rely on being able to reliably distinguish the EEG channels from au
 
 Our configuration
 has the following plugins installed:
