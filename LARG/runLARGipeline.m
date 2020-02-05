@@ -1,16 +1,21 @@
 %% This script runs the Asr pipeline on available studies to remove artifacts
 
-%% Set up the parameters
+%% Set up the general processing parameters
 dataDirIn = 'D:\Research\EEGPipelineProject\dataIn';
 dataDirOut = 'D:\Research\EEGPipelineProject\dataOut';
 eegFile = 'speedControlSession1Subj2015Rec1.set';
-algorithm = 'ASR';
-burstCriterion = 5;
+algorithm = 'LARG';
 resamplingFrequency = 128;
 capType = '';
+interpolateBadChannels = true;
+excludeChannels = {}; % List channel names of mastoids or other non-scalp channels
 blinkEventsToAdd = {'maxFrame', 'leftZero', 'rightZero', 'leftBase', ...
                    'rightBase', 'leftZeroHalfHeight', 'rightZeroHalfHeight'};
-interpolateBadChannels = true;
+               
+%% Parameter settings specific for LARG
+icaType = 'runica';   % If 'none', no eye-catch is performed.
+regressBlinkEvents = false;
+regressBlinkSignal = false;
 
 %% Make sure output directory exists
 if ~exist(dataDirOut, 'dir')
@@ -22,6 +27,7 @@ pop_editoptions('option_single', false, 'option_savetwofiles', false, ...
     'option_computeica', false);
 
 %% Load the EEG file
+[thePath, theName, theExt] = fileparts(eegFile);
 EEG = pop_loadset([dataDirIn filesep eegFile]);
 
 %% Make sure it has a dataRecordingUuid for identification downstream
@@ -41,10 +47,30 @@ EEG.chanlocs = EEG.chanlocs(chanMask);
 EEG.data = EEG.data(chanMask, :);
 EEG.nbchan = sum(chanMask);
 
+%% Perform PREP to remove line noise, robust ref, and interpolate bad channels
+chanlocs = EEG.chanlocs;
+allEEGChannels = {chanlocs.labels};
+allScalpChannels = allEEGChannels;
+if ~isempty(excludeChannels)
+    [commonLabels, indAll] = intersect(allEEGChannels, excludeChannels);
+    allScalpChannels(indAll) = [];
+end
+params = struct();
+params.referenceChannels = allScalpChannels;
+params.evaluationChannels = allScalpChannels;
+params.rereferencedChannels = allEEGChannels;
+params.detrendChannels = params.rereferencedChannels;
+params.lineNoiseChannels = params.rereferencedChannels;
+params.name = theName;
+params.ignoreBoundaryEvents = true; % ignore boundary events
+EEG = prepPipeline(EEG, params);
+
 %% If a reduction of channels (only Biosemi256 to Biosemi64 is supported)
 if strcmpi(capType, 'Biosemi256')
     EEG = convertEEGFromBiosemi256ToB64(EEG, capType, false);
     warning('Converting from Biosemi256 to Biosemi64: %s', fileName);
+elseif size(EEG.data > 64, 2)
+    warning('The original LARG pipeline remapped to 64 channels in 10-20 config');
 end
 
 %% If downsampling before processing
@@ -57,13 +83,16 @@ params = checkBlinkerDefaults(struct(), getBlinkerDefaults(EEG));
 params.fileName = eegFile;
 params.signalNumbers = 1:length(EEG.chanlocs);
 params.dumpBlinkerStructures = false;
-%params.blinkerDumpDir = blinkIndDir;
 params.dumpBlinkImages = false;
 params.dumpBlinkPositions = false;
 params.keepSignals = false;      % Make true if combining downstream
 params.showMaxDistribution = true;
 params.verbose = false;
+
+% defFigVisibility = get(0, 'DefaultFigureVisible');
+% set(0, 'DefaultFigureVisible', figuresVisible)
 [EEG, com, blinks, fits, props, stats, params] = pop_blinker(EEG, params);
+% set(0, 'DefaultFigureVisible', defFigVisibility)
 
 %% Save the blinkInfo for downstream analysis
 blinkInfo = struct();
@@ -86,11 +115,11 @@ else
     end
 end
 
-%% Compute channel and global amplitudes before Asr
+%% Compute channel and global amplitudes before
 fprintf(['Computing channel amplitudes (robust standard deviations) ' ...
     'before artifact activity removal..\n']);
 EEGLowpassedBefore = pop_eegfiltnew(EEG, [], 20); % lowpassed at 20 Hz
-amplitudeInfoBeforeAsr.allDataRobustStd = ...
+amplitudeInfoBeforeLARG.allDataRobustStd = ...
     std_from_mad(vec(EEGLowpassedBefore.data));
 channelRobustStd = zeros(size(EEGLowpassedBefore.data, 1), 1);
 for i=1:size(EEGLowpassedBefore.data, 1)
@@ -98,43 +127,32 @@ for i=1:size(EEGLowpassedBefore.data, 1)
         median(abs(EEGLowpassedBefore.data(i,:)' ...
         - median(EEGLowpassedBefore.data(i,:), 2))) * 1.4826;
 end
-amplitudeInfoBeforeAsr.channelRobustStd = channelRobustStd;
-EEG.etc.amplitudeInfoBeforeAsr = amplitudeInfoBeforeAsr;
+amplitudeInfoBeforeLARG.channelRobustStd = channelRobustStd;
+EEG.etc.amplitudeInfoBeforeAsr = amplitudeInfoBeforeLARG;
 
-%% Now compute Asr
-chanlocsOriginal = EEG.chanlocs;
-EEG = clean_artifacts(EEG, 'FlatlineCriterion', 5, ...
-        'ChannelCriterion',0.8, 'LineNoiseCriterion', 4, ...
-        'Highpass', [0.25 0.75],'BurstCriterion', burstCriterion, ...
-        'WindowCriterion','off','BurstRejection','off');
 
-%% Check to make sure that all of the channels are there
-if interpolateBadChannels && length(EEG.chanlocs) ~= length(chanlocsOriginal)
-    oldLabels = {chanlocsOriginal.labels};
-    newLabels = {EEG.chanlocs.labels};
-    interpolatedChannels = setdiff(oldLabels, newLabels);
-    fprintf('%s: %d channels interpolated', eegFile, ...
-        length(interpolatedChannels));
-    EEG = eeg_interp(EEG, chanlocsOriginal, 'spherical');
-    EEG.etc.interpolatedChannels = interpolatedChannels; 
-end
+%% Remove eye artifact and blink activity from time-domain (uses EyeCatch)
+[EEG, blinkInfo, removalInfo] = removeEyeArtifactsLARG(EEG, blinkInfo, ...
+                         icaType, regressBlinkEvents, regressBlinkSignal);
+EEG.icaact = [];
+    
 
 %% Now compute the amplitude vectors after ASR for future reference
-EEGLowpassedAfterAsr = pop_eegfiltnew(EEG, [], 20); % lowpassed at 20 Hz
-amplitudeInfoAfterAsr.allDataRobustStd = ...
-    std_from_mad(vec(EEGLowpassedAfterAsr.data));
-channelRobustStd = zeros(size(EEGLowpassedAfterAsr.data, 1), 1);
-for i = 1:size(EEGLowpassedAfterAsr.data, 1)
+EEGLowpassedAfterLARG = pop_eegfiltnew(EEG, [], 20); % lowpassed at 20 Hz
+amplitudeInfoAfterLARG.allDataRobustStd = ...
+    std_from_mad(vec(EEGLowpassedAfterLARG.data));
+channelRobustStd = zeros(size(EEGLowpassedAfterLARG.data, 1), 1);
+for i = 1:size(EEGLowpassedAfterLARG.data, 1)
     channelRobustStd(i) = ...
-        median(abs(EEGLowpassedAfterAsr.data(i,:)' ...
-        - median(EEGLowpassedAfterAsr.data(i,:), 2))) * 1.4826;
+        median(abs(EEGLowpassedAfterLARG.data(i,:)' ...
+        - median(EEGLowpassedAfterLARG.data(i,:), 2))) * 1.4826;
 end
-amplitudeInfoAfterAsr.channelRobustStd = channelRobustStd;
-amplitudeInfoAfterAsr.custom.sourceDataRecordingId = EEG.etc.dataRecordingUuid;
-EEG.etc.amplitudeInfoAfterAsr = amplitudeInfoAfterAsr;
+amplitudeInfoAfterLARG.channelRobustStd = channelRobustStd;
+amplitudeInfoAfterLARG.custom.sourceDataRecordingId = EEG.etc.dataRecordingUuid;
+EEG.etc.amplitudeInfoAfterLARG = amplitudeInfoAfterLARG;
 
 %% Now save the files
-[thePath, theName, theExt] = fileparts(eegFile);
 outName = [dataDirOut filesep theName '_' algorithm];
 pop_saveset(EEG, 'filename', [outName '.set'], 'version', '7.3');
 save([outName '_blinkInfo.mat'], 'blinkInfo', '-v7.3');
+save([outName '_EyeRemovalInfo.mat'], 'removalInfo', '-v7.3');

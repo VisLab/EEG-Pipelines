@@ -163,13 +163,11 @@ for k = 1:numRecordings
         Block('tensor', vec(channelRobustStd), 'axes', {channelAxis});
     clear EEGLowpassedBeforeEyeRemoval
         
-    %% remove eye artifact and blink activity from time-domain (uses EyeCatch)
-    recordingRun.eyeActivityRemovalClock.start = clock;
+    %% Remove eye artifact and blink activity from time-domain (uses EyeCatch)
     [EEG, blinkInfo, removalInfo] = removeEyes(EEG, 'useICA', true, ...
         'useBlinkEvents', true, 'useBlinkSignal', true, 'icaType', ...
         icaType, 'downsampleBeforeICA', false);
     EEG.icaact = [];
-    recordingRun.eyeActivityRemovalClock.end = clock;
     
     %% Add the recording ID for tracking purposes and save the data
     fprintf('Saving the results...\n');

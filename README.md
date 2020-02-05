@@ -7,7 +7,20 @@ the following paper. This repository provides code that implements these
 pipelines. The original pipelines were implemented using a code infrastructure
 that supports large-scale processing. The codes in this repository were 
 stripped out of that infrastructure and redesigned to run on a single EEG
-file in .set file format.
+recording file in .set file format. The recording should be at least 15 
+minutes in length in order for the pipelines to work effectively as several
+of the components in them (such as PREP and Blinker) use signal statistics
+to set thresholds. ASR needs data to calibrate.  
+
+The pipelines are fully automated, once the parameters at the top of 
+each script are set. The supported pipelines are:
+  * LARG uses ICA, Blinker and eye-catch to identify and remove eye artifacts
+  * MARA uses ICA and MARA to identify and remove eye artifacts
+  * ASR standard application of ASR from raw data
+  * ASR_ALT modified ASR which uses PREP for line noise, robust referencing, 
+    and bad channel identification and performs filtering using Hamming windows.
+    (This alternative is not necessarily recommended, but was developed to
+     make a closer comparison with LARG and MARA.)
 
 How to cite:
 > How sensitive are EEG results to preprocessing methods: A Benchmarking study  
