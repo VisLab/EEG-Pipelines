@@ -4,7 +4,7 @@
 dataDirIn = 'D:\Research\EEGPipelineProject\dataIn';
 dataDirOut = 'D:\Research\EEGPipelineProject\dataOut';
 eegFile = 'speedControlSession1Subj2015Rec1.set';
-algorithm = 'LARG';
+algorithm = 'MARA';
 resamplingFrequency = 128;
 capType = '';
 interpolateBadChannels = true;
@@ -117,40 +117,41 @@ else
 end
 
 %% Compute channel and global amplitudes before
-fprintf('Computing channel amplitudes before LARG ...\n');
+fprintf(['Computing channel amplitudes before MARA ...\n');
 EEGLowpassed = pop_eegfiltnew(EEG, [], 20); % lowpassed at 20 Hz
-amplitudeInfoBefore.allDataRobustStd = std_from_mad(vec(EEGLowpassed.data));
+amplitudeInfo = struct();
+amplitudeInfo.allDataRobustStd = ...
+    std_from_mad(vec(EEGLowpassed.data));
 channelRobustStd = zeros(size(EEGLowpassed.data, 1), 1);
 for i=1:size(EEGLowpassed.data, 1)
     channelRobustStd(i) = median(abs(EEGLowpassed.data(i,:)' ...
         - median(EEGLowpassed.data(i,:), 2))) * 1.4826;
 end
-amplitudeInfoBefore.channelRobustStd = channelRobustStd;
-EEG.etc.amplitudeInfoBeforeLARG = amplitudeInfoBefore;
-clear EEGLowPassed;
+amplitudeInfo.channelRobustStd = channelRobustStd;
+EEG.etc.amplitudeInfoBeforeMARA = amplitudeInfo;
+clear EEGLowpassed;
 
-%% Remove eye artifact and blink activity from time-domain (uses EyeCatch)
-[EEG, removalInfo] = removeEyeArtifactsLARG(EEG, blinkInfo, ...
-                         icaType, regressBlinkEvents, regressBlinkSignal);
-EEG.icaact = [];
+%% Remove eye artifact and blink activity from time-domain using MARA
+fprintf('Removing artifacts using MARA....');
+[EEG, removalInfo] = removeArtifactsMara(EEG, icaType);
+EEG.icaact = []; 
 
-%% Now compute the amplitude vectors after LARG
-fprintf('Computing channel amplitudes after LARG ...\n');
+%% Now compute the amplitude vectors after MARA
+fprintf(['Computing channel amplitudes after MARA ...\n');
 EEGLowpassed = pop_eegfiltnew(EEG, [], 20); % lowpassed at 20 Hz
 amplitudeInfo = struct();
 amplitudeInfo.allDataRobustStd = std_from_mad(vec(EEGLowpassed.data));
 channelRobustStd = zeros(size(EEGLowpassed.data, 1), 1);
 for i = 1:size(EEGLowpassed.data, 1)
     channelRobustStd(i) = median(abs(EEGLowpassed.data(i,:)' ...
-        - median(EEGLowpassed.data(i,:), 2))) * 1.4826;
+                         - median(EEGLowpassed.data(i,:), 2))) * 1.4826;
 end
 amplitudeInfo.channelRobustStd = channelRobustStd;
 amplitudeInfo.custom.sourceDataRecordingId = EEG.etc.dataRecordingUuid;
-EEG.etc.amplitudeInfoAfterLARG = amplitudeInfo;
-clear EEGLowpassed;
+EEG.etc.amplitudeInfoAfterMARA = amplitudeInfo;
 
 %% Now save the files
 outName = [dataDirOut filesep theName '_' algorithm];
 pop_saveset(EEG, 'filename', [outName '.set'], 'version', '7.3');
 save([outName '_blinkInfo.mat'], 'blinkInfo', '-v7.3');
-save([outName '_EyeRemovalInfo.mat'], 'removalInfo', '-v7.3');
+save([outName '_artifactRemovalInfo.mat'], 'removalInfo', '-v7.3');

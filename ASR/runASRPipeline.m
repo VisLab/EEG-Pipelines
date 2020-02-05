@@ -1,4 +1,4 @@
-%% This script runs the Asr pipeline on available studies to remove artifacts
+%% This script runs the ASR pipeline on available studies to remove artifacts
 
 %% Set up the parameters
 dataDirIn = 'D:\Research\EEGPipelineProject\dataIn';
@@ -86,20 +86,19 @@ else
     end
 end
 
-%% Compute channel and global amplitudes before Asr
-fprintf(['Computing channel amplitudes (robust standard deviations) ' ...
-    'before artifact activity removal..\n']);
-EEGLowpassedBefore = pop_eegfiltnew(EEG, [], 20); % lowpassed at 20 Hz
-amplitudeInfoBeforeAsr.allDataRobustStd = ...
-    std_from_mad(vec(EEGLowpassedBefore.data));
-channelRobustStd = zeros(size(EEGLowpassedBefore.data, 1), 1);
-for i=1:size(EEGLowpassedBefore.data, 1)
-    channelRobustStd(i) = ...
-        median(abs(EEGLowpassedBefore.data(i,:)' ...
-        - median(EEGLowpassedBefore.data(i,:), 2))) * 1.4826;
+%% Compute channel and global amplitudes before ASR
+fprintf('Computing channel amplitudes before ASR ...\n');
+EEGLowpassed = pop_eegfiltnew(EEG, [], 20); % lowpassed at 20 Hz
+amplitudeInfo = struct();
+amplitudeInfo.allDataRobustStd = std_from_mad(vec(EEGLowpassed.data));
+channelRobustStd = zeros(size(EEGLowpassed.data, 1), 1);
+for i=1:size(EEGLowpassed.data, 1)
+    channelRobustStd(i) = median(abs(EEGLowpassed.data(i,:)' ...
+                          - median(EEGLowpassed.data(i,:), 2))) * 1.4826;
 end
-amplitudeInfoBeforeAsr.channelRobustStd = channelRobustStd;
-EEG.etc.amplitudeInfoBeforeAsr = amplitudeInfoBeforeAsr;
+amplitudeInfo.channelRobustStd = channelRobustStd;
+EEG.etc.amplitudeInfoBeforeASR = amplitudeInfo;
+clear EEGLowpassed;
 
 %% Now compute Asr
 chanlocsOriginal = EEG.chanlocs;
@@ -120,18 +119,18 @@ if interpolateBadChannels && length(EEG.chanlocs) ~= length(chanlocsOriginal)
 end
 
 %% Now compute the amplitude vectors after ASR for future reference
-EEGLowpassedAfterAsr = pop_eegfiltnew(EEG, [], 20); % lowpassed at 20 Hz
-amplitudeInfoAfterAsr.allDataRobustStd = ...
-    std_from_mad(vec(EEGLowpassedAfterAsr.data));
-channelRobustStd = zeros(size(EEGLowpassedAfterAsr.data, 1), 1);
-for i = 1:size(EEGLowpassedAfterAsr.data, 1)
-    channelRobustStd(i) = ...
-        median(abs(EEGLowpassedAfterAsr.data(i,:)' ...
-        - median(EEGLowpassedAfterAsr.data(i,:), 2))) * 1.4826;
+fprintf('Computing channel amplitudes after ASR ...\n');
+EEGLowpassed = pop_eegfiltnew(EEG, [], 20); % lowpassed at 20 Hz
+amplitudeInfo = struct();
+amplitudeInfo.allDataRobustStd = std_from_mad(vec(EEGLowpassed.data));
+channelRobustStd = zeros(size(EEGLowpassed.data, 1), 1);
+for i = 1:size(EEGLowpassed.data, 1)
+    channelRobustStd(i) = median(abs(EEGLowpassed.data(i,:)' ...
+        - median(EEGLowpassed.data(i,:), 2))) * 1.4826;
 end
-amplitudeInfoAfterAsr.channelRobustStd = channelRobustStd;
-amplitudeInfoAfterAsr.custom.sourceDataRecordingId = EEG.etc.dataRecordingUuid;
-EEG.etc.amplitudeInfoAfterAsr = amplitudeInfoAfterAsr;
+amplitudeInfo.channelRobustStd = channelRobustStd;
+amplitudeInfo.custom.sourceDataRecordingId = EEG.etc.dataRecordingUuid;
+EEG.etc.amplitudeInfoAfterASR = amplitudeInfo;
 
 %% Now save the files
 [thePath, theName, theExt] = fileparts(eegFile);

@@ -15,26 +15,10 @@ function [EEG, removalInfo] = removeEyeArtifactsLARG(EEG, blinkInfo, ...
 %      regressBlinkSignal  if true, blink signal is regressed out
 %
 
-%% Run ICA if needed
+%% Run ICA if needed and perform eyeCatch to remove bad ICS
 removalInfo = [];
-if strcmpi(icaType, 'runica')
-    [cleanEEG, isFrameAnArtifact]= cleanWindows(EEG);
-    cleanEEG = runicaLowrank(cleanEEG, 'off');
-    EEG.icawinv = cleanEEG.icawinv;
-    EEG.icasphere = cleanEEG.icasphere;
-    EEG.icaweights = cleanEEG.icaweights;
-    clear cleanEEG;
-elseif strcmpi(icaType, 'infomax')
-    [cleanEEG, isFrameAnArtifact]= cleanWindows(EEG);
-    cleanEEG = cudaica_lowrank(cleanEEG, 'off');
-    icaTime = toc;
-    EEG.icawinv = cleanEEG.icawinv;
-    EEG.icasphere = cleanEEG.icasphere;
-    EEG.icaweights = cleanEEG.icaweights;
-    clear cleanEEG;
-end
-
 if ~isempty(icaType)
+    [EEG, isFrameAnArtifact] = insertICA(EEG, icaType);
     eyeDetector = eyeCatch;
     [isEye, ~, scalpmapObj] = eyeDetector.detectFromEEG(EEG);
     
@@ -54,6 +38,7 @@ if ~isempty(icaType)
     removalInfo.icaTime = icaTime;
 end
 
+%% Now regress out blink information if requested
 if ~isempty(blinkInfo)
     if regressBlinkEvents
         obj = TemporalOverlapDesignOfEEG;
