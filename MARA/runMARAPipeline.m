@@ -117,7 +117,7 @@ else
 end
 
 %% Compute channel and global amplitudes before
-fprintf(['Computing channel amplitudes before MARA ...\n');
+fprintf('Computing channel amplitudes before MARA ...\n');
 EEGLowpassed = pop_eegfiltnew(EEG, [], 20); % lowpassed at 20 Hz
 amplitudeInfo = struct();
 amplitudeInfo.allDataRobustStd = ...
@@ -137,7 +137,7 @@ fprintf('Removing artifacts using MARA....');
 EEG.icaact = []; 
 
 %% Now compute the amplitude vectors after MARA
-fprintf(['Computing channel amplitudes after MARA ...\n');
+fprintf('Computing channel amplitudes after MARA ...\n');
 EEGLowpassed = pop_eegfiltnew(EEG, [], 20); % lowpassed at 20 Hz
 amplitudeInfo = struct();
 amplitudeInfo.allDataRobustStd = std_from_mad(vec(EEGLowpassed.data));
