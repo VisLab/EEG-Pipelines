@@ -1,4 +1,4 @@
-%% This script runs the Asr pipeline on available studies to remove artifacts
+%% This script runs the underlying subspace removal mechanism of ASR to remove
 
 %% Set up the general processing parameters
 dataDirIn = 'D:\Research\EEGPipelineProject\dataIn';
@@ -6,17 +6,15 @@ dataDirOut = 'D:\Research\EEGPipelineProject\dataOut';
 eegFile = 'speedControlSession1Subj2015Rec1.set';
 algorithm = 'LARG';
 maxSamplingRate = 128;
-highPassFrequency = 1.0;
+highPassFrequency = 128;
 capType = '';
 interpolateBadChannels = true;
 excludeChannels = {}; % List channel names of mastoids or other non-scalp channels
 blinkEventsToAdd = {'maxFrame', 'leftZero', 'rightZero', 'leftBase', ...
                    'rightBase', 'leftZeroHalfHeight', 'rightZeroHalfHeight'};
                
-%% Parameter settings specific for LARG
-icaType = 'runica';   % If 'none', no eye-catch is performed.
-regressBlinkEvents = false;
-regressBlinkSignal = false;
+%% Parameter settings specific for ASR
+burstCriterion = 5;
 
 %% Make sure output directory exists
 if ~exist(dataDirOut, 'dir')
@@ -63,6 +61,8 @@ params.evaluationChannels = allScalpChannels;
 params.rereferencedChannels = allEEGChannels;
 params.detrendChannels = params.rereferencedChannels;
 params.lineNoiseChannels = params.rereferencedChannels;
+params.keepFiltered = false;   % Only reference don't high-pass filter
+params.interpolationOrder = 'none';  % Don't interpolate bad channels
 params.name = theName;
 params.ignoreBoundaryEvents = true; % ignore boundary events
 EEG = prepPipeline(EEG, params);
@@ -116,7 +116,7 @@ else
 end
 
 %% Compute channel and global amplitudes before
-fprintf('Computing channel amplitudes before LARG ...\n');
+fprintf('Computing channel amplitudes before ASR ...\n');
 EEGLowpassed = pop_eegfiltnew(EEG, [], 20); % lowpassed at 20 Hz
 amplitudeInfoBefore.allDataRobustStd = std_from_mad(vec(EEGLowpassed.data));
 channelRobustStd = zeros(size(EEGLowpassed.data, 1), 1);
@@ -128,12 +128,10 @@ amplitudeInfoBefore.channelRobustStd = channelRobustStd;
 EEG.etc.amplitudeInfoBeforeLARG = amplitudeInfoBefore;
 clear EEGLowPassed;
 
-%% Remove eye artifact and blink activity from time-domain (uses EyeCatch)
-[EEG, removalInfo] = removeEyeArtifactsLARG(EEG, blinkInfo, ...
-                         icaType, regressBlinkEvents, regressBlinkSignal);
-EEG.icaact = [];
+%% Use subspace removal to remove the artifacts
+EEG = clean_asr(EEG, burstCriterion);
 
-%% Now compute the amplitude vectors after LARG
+%% Now compute the amplitude vectors after ASR
 fprintf('Computing channel amplitudes after LARG ...\n');
 EEGLowpassed = pop_eegfiltnew(EEG, [], 20); % lowpassed at 20 Hz
 amplitudeInfo = struct();
@@ -152,4 +150,3 @@ clear EEGLowpassed;
 outName = [dataDirOut filesep theName '_' algorithm];
 pop_saveset(EEG, 'filename', [outName '.set'], 'version', '7.3');
 save([outName '_blinkInfo.mat'], 'blinkInfo', '-v7.3');
-save([outName '_EyeRemovalInfo.mat'], 'removalInfo', '-v7.3');

@@ -1,4 +1,4 @@
-function EEG = cudaica_lowrank(EEG, verbose)
+function EEG = cudaicaLowrank(EEG, verbose)
 % Perform ICA on rank defficient EEG data using PCA reduction.
 % This function is a minimalistic wrapper for computing the ICA decomposition
 % of EEG data on a GPU using cudaica. If no GPU is available it tries to

@@ -6,16 +6,13 @@ dataDirOut = 'D:\Research\EEGPipelineProject\dataOut';
 eegFile = 'speedControlSession1Subj2015Rec1.set';
 algorithm = 'MARA';
 resamplingFrequency = 128;
+highPassFrequency = 1.0;
 capType = '';
 interpolateBadChannels = true;
 excludeChannels = {}; % List channel names of mastoids or other non-scalp channels
 blinkEventsToAdd = {'maxFrame', 'leftZero', 'rightZero', 'leftBase', ...
                    'rightBase', 'leftZeroHalfHeight', 'rightZeroHalfHeight'};
-               
-%% Parameter settings specific for LARG
-icaType = 'runica';   % If 'none', no eye-catch is performed.
-regressBlinkEvents = false;
-regressBlinkSignal = false;
+icaType = 'runica'; 
 
 %% Make sure output directory exists
 if ~exist(dataDirOut, 'dir')
@@ -74,10 +71,8 @@ elseif size(EEG.data > 64, 2)
     warning('The original LARG pipeline remapped to 64 channels in 10-20 config');
 end
 
-%% If downsampling before processing
-if ~isempty(resamplingFrequency) && EEG.srate > resamplingFrequency
-    EEG = pop_resample(EEG, resamplingFrequency);
-end
+%% Remove channel mean, filter, and resample if necessary
+EEG = filterAndResample(EEG, maxSamplingRate, highPassFrequency);
 
 %% Now run Blinker to insert blink events
 params = checkBlinkerDefaults(struct(), getBlinkerDefaults(EEG));
@@ -133,7 +128,7 @@ clear EEGLowpassed;
 
 %% Remove eye artifact and blink activity from time-domain using MARA
 fprintf('Removing artifacts using MARA....');
-[EEG, removalInfo] = removeArtifactsMara(EEG, icaType);
+[EEG, removalInfo] = removeArtifactsMARA(EEG, icaType);
 EEG.icaact = []; 
 
 %% Now compute the amplitude vectors after MARA

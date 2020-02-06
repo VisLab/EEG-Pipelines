@@ -1,4 +1,4 @@
-function [EEG, removalInfo] = removeArtifactsMara(EEG, icaType)
+function [EEG, removalInfo] = removeArtifactsMARA(EEG, icaType)
 %% Performs the MARA algorithm to remove artifacts.
 %
 %  Parameters:
@@ -12,7 +12,7 @@ if isempty(EEG.icaweights)
 end
 
 %% Perform the MARA algorithms to identify bad ICs
-[artcomps, maraInfo] = MARARevised(EEG);
+[artcomps, maraInfo] = MARA(EEG);
 
 %% Remove bad ICs
 rejectMask = zeros(1, size(EEG.icawinv, 2));

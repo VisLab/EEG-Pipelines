@@ -10,15 +10,17 @@ stripped out of that infrastructure and redesigned to run on a single EEG
 recording file in .set file format. The recording should be at least 15 
 minutes in length in order for the pipelines to work effectively as several
 of the components in them (such as PREP and Blinker) use signal statistics
-to set thresholds. ASR needs data to calibrate.  
+to set thresholds. ASR needs data to calibrate.  The code was tested on MATLAB
+2019a and EEGLAB version eeglab2019_1. 
 
 The pipelines are fully automated, once the parameters at the top of 
 each script are set. The supported pipelines are:
-  * LARG uses ICA, Blinker and eye-catch to identify and remove eye artifacts
+  * LARG uses ICA, Blinker, and eye-catch to identify and remove eye artifacts
   * MARA uses ICA and MARA to identify and remove eye artifacts
-  * ASR standard application of ASR from raw data
-  * ASR_ALT modified ASR which uses PREP for line noise, robust referencing, 
-    and bad channel identification and performs filtering using Hamming windows.
+  * ASR uses standard application of ASR from raw data
+  * ASRalt which uses PREP for line noise, robust referencing, 
+    and bad channel identification and performs filtering using Hamming windows. It
+	then uses the artifact subspace removal portion of ASR (clean_asr) to remove artifacts.
     (This alternative is not necessarily recommended, but was developed to
      make a closer comparison with LARG and MARA.)
 
@@ -29,7 +31,10 @@ How to cite:
 
 
 ## Setup
-Before running any of these pipelines, you must make sure that you have
+Before running any of these pipelines, you must make sure that you have the following setup.
+Although the stub for using cudaica is included, cudaica has not been included in the
+repository. Thus, ICA options are either runica or binica, unless you set up cudiaca to run
+on your GPU.
 
 ### Setup of EEGLAB
 The instructions are based on EEGLAB v2019.1 or later. The following
@@ -37,7 +42,7 @@ EEGLAB plugins were installed in the default configuration:
  1. clean_rawdata2.1
  2. dipfit
  3. firfilt2.3
- 4. ICLabel1.1
+ 4. ICLabel1.1  
 
 We also installed the following EEGLAB plugins:
  1. blinker1.1.2
@@ -53,7 +58,7 @@ You will also need go download eye-catch from https://github.com/bigdelys/eye-ca
 Add this directory to your path as well.
 
 ### Add the pipelines to your path by executing:
-    runAddProjectPaths
+    runEEGPipelineProjectPaths
 
 ## Data preparation
 

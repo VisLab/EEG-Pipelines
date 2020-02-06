@@ -6,8 +6,8 @@ scriptFile = mfilename('fullpath');
 thisPath = [scriptFolder filesep 'ASR'];
 addpath(genpath(thisPath));
 
-%% Add paths for ASR_Alt
-thisPath = [scriptFolder filesep 'ASR_Alt'];
+%% Add paths for ASRalt
+thisPath = [scriptFolder filesep 'ASRalt'];
 addpath(genpath(thisPath));
 
 %% Add paths for LARG

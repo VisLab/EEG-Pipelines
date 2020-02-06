@@ -1,4 +1,4 @@
-function [robustStds, medianValues]= std_from_mad(x, dim)
+function [robustStds, medianValues]= stdFromMad(x, dim)
 % [robustStds, medianValues]= std_from_mad(x, dim)
 % calculate robust standard deviation using median absolute deviation (MAD)
 % acts similar to std and medidan with x being a vector or matrix and 
@@ -7,7 +7,7 @@ function [robustStds, medianValues]= std_from_mad(x, dim)
 
 if nargin < 2
     dim = 1;
-end;
+end
 
 medianValues = median(x, dim);
 
