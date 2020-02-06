@@ -21,8 +21,8 @@ to set thresholds. ASR needs data to calibrate.  The code was tested on MATLAB
 
 The pipelines are fully automated, once the parameters at the top of 
 each script are set. The supported pipelines are:
-  * LARG uses ICA, Blinker, and eye-catch to identify and remove eye artifacts.
-  * MARA uses ICA and MARA to identify and remove eye artifacts.
+  * LARG uses ICA, Blinker, and eye-catch to identify and remove eye artifacts
+  * MARA uses ICA and MARA to identify and remove eye artifacts
   * ASR uses standard application of ASR from raw data (`clean_artifacts`).
   * ASRalt uses PREP for line noise, robust referencing, 
     and bad channel identification and Hamming windows for filtering (as the
@@ -77,8 +77,6 @@ pipeline.
 **Reduction of number of channels:** The pipeline implementation reported
 in our publication reduces the number of channels to 64 prior to performing
 most of the pipeline. To do this, you must provide a channel mapping. We have
-provided one channel mapping (for Biosemi 256-channel headsets into closest
-channels in Biosemi 64-channel headsets using standard caps). The pipelines
-can be run with more than 64 channels, but we have not evaluated the results
-for more channels.
+provided one channel mapping (
+only EEG channels remain in the .set file before processing begins.
 
