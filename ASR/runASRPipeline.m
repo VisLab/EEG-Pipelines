@@ -7,7 +7,7 @@ eegFile = [dataDirIn filesep 'speedControlSession1Subj2015Rec1.set'];
 algorithm = 'ASR';
 burstCriterion = 5;
 maxSamplingRate = 128;
-highPassFrequency = [];  % Let ASR do its own filtering
+highPassFrequency = [];  % Let ASR clean_artifacts do its own filtering
 capType = '';
 blinkEventsToAdd = {'maxFrame', 'leftZero', 'rightZero', 'leftBase', ...
                    'rightBase', 'leftZeroHalfHeight', 'rightZeroHalfHeight'};
@@ -46,10 +46,12 @@ EEG.nbchan = sum(chanMask);
 if strcmpi(capType, 'Biosemi256')
     EEG = convertEEGFromBiosemi256ToB64(EEG, capType, false);
     warning('Converting from Biosemi256 to Biosemi64: %s', fileName);
+elseif size(EEG.data > 64, 1)
+    warning('The original LARG pipeline remapped to 64 channels in 10-20 config');
 end
 
 %% Remove channel mean, filter, and resample if necessary
-EEG = filterAndResample(EEG, maxSamplingRate, highPassFrequency);
+EEG = filterAndResample(EEG, highPassFrequency, maxSamplingRate);
 
 %% Now run Blinker to insert blink events
 fprintf('Detecting and adding blink events...\n');
@@ -60,7 +62,7 @@ params.dumpBlinkerStructures = false;
 params.dumpBlinkImages = false;
 params.dumpBlinkPositions = false;
 params.keepSignals = false;      % Make true if combining downstream
-params.showMaxDistribution = true;
+params.showMaxDistribution = false;
 params.verbose = false;
 [EEG, com, blinks, fits, props, stats, params] = pop_blinker(EEG, params);
 
@@ -89,7 +91,7 @@ end
 fprintf('Computing channel amplitudes before ASR ...\n');
 EEGLowpassed = pop_eegfiltnew(EEG, [], 20); % lowpassed at 20 Hz
 amplitudeInfo = struct();
-amplitudeInfo.allDataRobustStd = std_from_mad(vec(EEGLowpassed.data));
+amplitudeInfo.allDataRobustStd = stdFromMad(vec(EEGLowpassed.data));
 channelRobustStd = zeros(size(EEGLowpassed.data, 1), 1);
 for i=1:size(EEGLowpassed.data, 1)
     channelRobustStd(i) = median(abs(EEGLowpassed.data(i,:)' ...
@@ -121,7 +123,7 @@ end
 fprintf('Computing channel amplitudes after ASR ...\n');
 EEGLowpassed = pop_eegfiltnew(EEG, [], 20); % lowpassed at 20 Hz
 amplitudeInfo = struct();
-amplitudeInfo.allDataRobustStd = std_from_mad(vec(EEGLowpassed.data));
+amplitudeInfo.allDataRobustStd = stdFromMad(vec(EEGLowpassed.data));
 channelRobustStd = zeros(size(EEGLowpassed.data, 1), 1);
 for i = 1:size(EEGLowpassed.data, 1)
     channelRobustStd(i) = median(abs(EEGLowpassed.data(i,:)' ...

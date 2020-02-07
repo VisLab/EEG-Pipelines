@@ -5,7 +5,7 @@ dataDirIn = 'D:\Research\EEGPipelineProject\dataIn';
 dataDirOut = 'D:\Research\EEGPipelineProject\dataOut';
 eegFile = 'speedControlSession1Subj2015Rec1.set';
 algorithm = 'MARA';
-resamplingFrequency = 128;
+maxSamplingRate = 128;
 highPassFrequency = 1.0;
 capType = '';
 interpolateBadChannels = true;
@@ -67,12 +67,12 @@ EEG = prepPipeline(EEG, params);
 if strcmpi(capType, 'Biosemi256')
     EEG = convertEEGFromBiosemi256ToB64(EEG, capType, false);
     warning('Converting from Biosemi256 to Biosemi64: %s', fileName);
-elseif size(EEG.data > 64, 2)
+elseif size(EEG.data > 64, 1)
     warning('The original LARG pipeline remapped to 64 channels in 10-20 config');
 end
 
 %% Remove channel mean, filter, and resample if necessary
-EEG = filterAndResample(EEG, maxSamplingRate, highPassFrequency);
+EEG = filterAndResample(EEG, highPassFrequency, maxSamplingRate);
 
 %% Now run Blinker to insert blink events
 params = checkBlinkerDefaults(struct(), getBlinkerDefaults(EEG));
@@ -115,8 +115,7 @@ end
 fprintf('Computing channel amplitudes before MARA ...\n');
 EEGLowpassed = pop_eegfiltnew(EEG, [], 20); % lowpassed at 20 Hz
 amplitudeInfo = struct();
-amplitudeInfo.allDataRobustStd = ...
-    std_from_mad(vec(EEGLowpassed.data));
+amplitudeInfo.allDataRobustStd = stdFromMad(vec(EEGLowpassed.data));
 channelRobustStd = zeros(size(EEGLowpassed.data, 1), 1);
 for i=1:size(EEGLowpassed.data, 1)
     channelRobustStd(i) = median(abs(EEGLowpassed.data(i,:)' ...
@@ -135,7 +134,7 @@ EEG.icaact = [];
 fprintf('Computing channel amplitudes after MARA ...\n');
 EEGLowpassed = pop_eegfiltnew(EEG, [], 20); % lowpassed at 20 Hz
 amplitudeInfo = struct();
-amplitudeInfo.allDataRobustStd = std_from_mad(vec(EEGLowpassed.data));
+amplitudeInfo.allDataRobustStd = stdFromMad(vec(EEGLowpassed.data));
 channelRobustStd = zeros(size(EEGLowpassed.data, 1), 1);
 for i = 1:size(EEGLowpassed.data, 1)
     channelRobustStd(i) = median(abs(EEGLowpassed.data(i,:)' ...

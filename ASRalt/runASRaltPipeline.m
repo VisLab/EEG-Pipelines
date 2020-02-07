@@ -4,9 +4,9 @@
 dataDirIn = 'D:\Research\EEGPipelineProject\dataIn';
 dataDirOut = 'D:\Research\EEGPipelineProject\dataOut';
 eegFile = 'speedControlSession1Subj2015Rec1.set';
-algorithm = 'LARG';
+algorithm = 'ASRalt';
 maxSamplingRate = 128;
-highPassFrequency = 128;
+highPassFrequency = 1.5;
 capType = '';
 interpolateBadChannels = true;
 excludeChannels = {}; % List channel names of mastoids or other non-scalp channels
@@ -56,13 +56,18 @@ if ~isempty(excludeChannels)
     allScalpChannels(indAll) = [];
 end
 params = struct();
+paramsInit.detrendType = 'high pass';
+paramsInit.detrendCutoff = 1;
+paramsInit.referenceType = 'robust';
+paramsInit.meanEstimateType = 'median';
+paramsInit.interpolationOrder = 'post-reference';
+paramsInit.removeInterpolatedChannels = false;
+paramsInit.keepFiltered = false;
 params.referenceChannels = allScalpChannels;
 params.evaluationChannels = allScalpChannels;
 params.rereferencedChannels = allEEGChannels;
 params.detrendChannels = params.rereferencedChannels;
 params.lineNoiseChannels = params.rereferencedChannels;
-params.keepFiltered = false;   % Only reference don't high-pass filter
-params.interpolationOrder = 'none';  % Don't interpolate bad channels
 params.name = theName;
 params.ignoreBoundaryEvents = true; % ignore boundary events
 EEG = prepPipeline(EEG, params);
@@ -71,12 +76,12 @@ EEG = prepPipeline(EEG, params);
 if strcmpi(capType, 'Biosemi256')
     EEG = convertEEGFromBiosemi256ToB64(EEG, capType, false);
     warning('Converting from Biosemi256 to Biosemi64: %s', fileName);
-elseif size(EEG.data > 64, 2)
+elseif size(EEG.data > 64, 1)
     warning('The original LARG pipeline remapped to 64 channels in 10-20 config');
 end
 
 %% Remove channel mean, filter, and resample if necessary
-EEG = filterAndResample(EEG, maxSamplingRate, highPassFrequency);
+EEG = filterAndResample(EEG, highPassFrequency, maxSamplingRate);
 
 %% Now run Blinker to insert blink events
 params = checkBlinkerDefaults(struct(), getBlinkerDefaults(EEG));
@@ -86,7 +91,7 @@ params.dumpBlinkerStructures = false;
 params.dumpBlinkImages = false;
 params.dumpBlinkPositions = false;
 params.keepSignals = false;      % Make true if combining downstream
-params.showMaxDistribution = true;
+params.showMaxDistribution = false;
 params.verbose = false;
 
 % defFigVisibility = get(0, 'DefaultFigureVisible');
@@ -118,7 +123,7 @@ end
 %% Compute channel and global amplitudes before
 fprintf('Computing channel amplitudes before ASR ...\n');
 EEGLowpassed = pop_eegfiltnew(EEG, [], 20); % lowpassed at 20 Hz
-amplitudeInfoBefore.allDataRobustStd = std_from_mad(vec(EEGLowpassed.data));
+amplitudeInfoBefore.allDataRobustStd = stdFromMad(vec(EEGLowpassed.data));
 channelRobustStd = zeros(size(EEGLowpassed.data, 1), 1);
 for i=1:size(EEGLowpassed.data, 1)
     channelRobustStd(i) = median(abs(EEGLowpassed.data(i,:)' ...
@@ -135,7 +140,7 @@ EEG = clean_asr(EEG, burstCriterion);
 fprintf('Computing channel amplitudes after LARG ...\n');
 EEGLowpassed = pop_eegfiltnew(EEG, [], 20); % lowpassed at 20 Hz
 amplitudeInfo = struct();
-amplitudeInfo.allDataRobustStd = std_from_mad(vec(EEGLowpassed.data));
+amplitudeInfo.allDataRobustStd = stdFromMad(vec(EEGLowpassed.data));
 channelRobustStd = zeros(size(EEGLowpassed.data, 1), 1);
 for i = 1:size(EEGLowpassed.data, 1)
     channelRobustStd(i) = median(abs(EEGLowpassed.data(i,:)' ...
