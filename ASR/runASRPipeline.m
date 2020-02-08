@@ -83,7 +83,7 @@ else
     if ~isempty(blinkEventsToAdd)
         [EEG, blinkSignal] = addBlinkEvents(EEG, blinks, ...
             fits, props, blinkEventsToAdd);
-        blinkInfo.custom.blinkSignal = blinkSignal;
+        blinkInfo.blinkSignal = blinkSignal;
     end
 end
 

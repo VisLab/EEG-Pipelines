@@ -1,4 +1,5 @@
-%% This script runs the Asr pipeline on available studies to remove artifacts
+%% This script runs the LARG pipeline on an EEG.set file. The full blink
+% regression is not available at this time.
 
 %% Set up the general processing parameters
 dataDirIn = 'D:\Research\EEGPipelineProject\dataIn';
@@ -86,13 +87,9 @@ params.dumpBlinkerStructures = false;
 params.dumpBlinkImages = false;
 params.dumpBlinkPositions = false;
 params.keepSignals = false;      % Make true if combining downstream
-params.showMaxDistribution = true;
+params.showMaxDistribution = false;
 params.verbose = false;
-
-% defFigVisibility = get(0, 'DefaultFigureVisible');
-% set(0, 'DefaultFigureVisible', figuresVisible)
 [EEG, com, blinks, fits, props, stats, params] = pop_blinker(EEG, params);
-% set(0, 'DefaultFigureVisible', defFigVisibility)
 
 %% Save the blinkInfo for downstream analysis
 blinkInfo = struct();
@@ -111,7 +108,7 @@ else
     if ~isempty(blinkEventsToAdd)
         [EEG, blinkSignal] = addBlinkEvents(EEG, blinks, ...
             fits, props, blinkEventsToAdd);
-        blinkInfo.custom.blinkSignal = blinkSignal;
+        blinkInfo.blinkSignal = blinkSignal;
     end
 end
 

@@ -29,6 +29,6 @@ addpath(genpath(thisPath));
 
 %% Add paths for eye-catch
 eyeCatchPath = 'D:\Research\EEGPipelineProject\eye-catch';
-addpath(thisPath);
+addpath(eyeCatchPath);
 addpath(genpath([thisPath filesep 'document']));
 addpath(genpath([thisPath filesep 'unit_test']));

@@ -82,13 +82,9 @@ params.dumpBlinkerStructures = false;
 params.dumpBlinkImages = false;
 params.dumpBlinkPositions = false;
 params.keepSignals = false;      % Make true if combining downstream
-params.showMaxDistribution = true;
+params.showMaxDistribution = false;
 params.verbose = false;
-
-% defFigVisibility = get(0, 'DefaultFigureVisible');
-% set(0, 'DefaultFigureVisible', figuresVisible)
 [EEG, com, blinks, fits, props, stats, params] = pop_blinker(EEG, params);
-% set(0, 'DefaultFigureVisible', defFigVisibility)
 
 %% Save the blinkInfo for downstream analysis
 blinkInfo = struct();
@@ -107,7 +103,7 @@ else
     if ~isempty(blinkEventsToAdd)
         [EEG, blinkSignal] = addBlinkEvents(EEG, blinks, ...
             fits, props, blinkEventsToAdd);
-        blinkInfo.custom.blinkSignal = blinkSignal;
+        blinkInfo.blinkSignal = blinkSignal;
     end
 end
 

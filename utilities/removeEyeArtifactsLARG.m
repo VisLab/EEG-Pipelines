@@ -35,7 +35,6 @@ if ~isempty(icaType)
     removalInfo.isEye = isEye;
     removalInfo.scalpmapObj = scalpmapObj;
     removalInfo.chanlocs = EEG.chanlocs;
-    removalInfo.icaTime = icaTime;
 end
 
 %% Now regress out blink information if requested
@@ -55,7 +54,7 @@ if ~isempty(blinkInfo)
         [obj, lowlevelResults] = obj.computeFactorValues(EEG.data', 'significance', false, 'outlierMask', []);
         predictedData = obj.designMatrix * lowlevelResults.factorCoefficients;
         EEG.data = EEG.data - predictedData';
-    else
+    elseif ~isempty(blinkInfo.blinkSignal)
         x = EEG.data / blinkInfo.blinkSignal;
         EEG.data = EEG.data - x * blinkInfo.blinkSignal;
     end
