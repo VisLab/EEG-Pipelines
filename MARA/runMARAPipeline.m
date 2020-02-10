@@ -3,6 +3,7 @@
 %% Set up the general processing parameters
 dataDirIn = 'D:\Research\EEGPipelineProject\dataIn';
 dataDirOut = 'D:\Research\EEGPipelineProject\dataOut';
+%eegFile = 'trafficComplexitySession1Subj2002Rec1.set';
 eegFile = 'speedControlSession1Subj2015Rec1.set';
 algorithm = 'MARA';
 maxSamplingRate = 128;
