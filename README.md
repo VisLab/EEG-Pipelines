@@ -62,6 +62,10 @@ Add this directory to your path as well.
 ### Add the pipelines to your path by executing:
     runEEGPipelineProjectPaths
 
+### Matlab required toolboxes:
+The pipelines assume the MATLAB statistics toolbox. Computation of the spectral
+fingerprints assumes the MATLAB wavelet toolbox.
+
 ## Data preparation
 
 **Channel locations:** The input `EEG.set` file MUST have channel locations included. Furthermore, the 
