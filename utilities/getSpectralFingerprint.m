@@ -1,37 +1,35 @@
 %% Create the random spectral points for the common channels
-function [spectrumPrint, bandPrint] = getSpectralFingerprint(EEG, channels,  ...
-                                    numFrequencies, freqRange, freqBands)
-%% Compute EEG spectral fingerprint and spectral band fingerprint
+function [spectralPrint, bandPrints] = getSpectralFingerprint(EEG, channels,  ...
+                                    numFreqs, freqRange, freqBands)
+%% Compute EEG spectral fingerprint and spectral band fingerprints
 %
 %  Parameters:
-
+%      EEG        EEG set structure
+%      channels   cell array of labels of channels in the fingerprint
+%      numFreqs   number of frequencies in the spectral fingerprints
+%      freqRange  1 x 2 array with smallest and largest frequency in print
+%      freqBands  n x 2 array with frequencies of the n bands to resolve
+%      spectralPrint  (output) freqs x times x channels array with spectral fingerprint
+%      bandPrints     (output) times x channels x bands array with band
+%                     averaged fingerprints
 %% Parameters
-freqRange = [2, 30]; 
-numFreqs = 50;
 wname = 'cmor1-1.5';
-freqBands = [2, 4; 4, 7; 7, 12; 12, 30];
-freqBandNames = {'Delta'; 'Theta'; 'Alpha'; 'Beta'};
 numFreqBands = size(freqBands, 1);
 
-%% Setup the recording map.
-template = struct('uuid', NaN, 'site', NaN, 'study', NaN, 'labId', NaN, ...
-    'srate', NaN, 'frequencies', NaN, 'scales', NaN, ...
-    'correlations', NaN, 'bandCorrelations', NaN);
-
 %% Initialize fingerprints and check channels are all there
-spectrumPrint = [];
-bandPrint = [];
+spectralPrint = [];
+bandPrints = [];
 [EEGNew, missing] = selectEEGChannels(EEG, channels);
 if ~isempty(missing)
-    warning('EEG is missing %d channels -- can not compute spectral fingerprints', ...
-           length(missing);
-       return;
+    warning('EEG is missing channels %s\n-- can not compute spectral fingerprints', ...
+            getListString(missing));
+    return;
 end
 numChannels = length(channels);
 
 %% Compute the wavelet scales
 T = 1/EEGNew.srate;
-[tScales, tFreqs] = freq2scales(freqRange(1), freqRange(2), numFrequencies, wname, T);
+[tScales, tFreqs] = freq2scales(freqRange(1), freqRange(2), numFreqs, wname, T);
 [~, sortIds] = sort(tFreqs, 'ascend');
 scales = tScales(sortIds);
 freqs = tFreqs(sortIds);
@@ -45,7 +43,7 @@ for c = 1:numChannels
     baselineMedian = median(tfd, 2);
     tfd = bsxfun(@minus, tfd, baselineMedian);
     baselineRobustStd = median(abs(tfd), 2) * 1.4826;
-    tfdecomp{c, m} = bsxfun(@times, tfd, 1./ baselineRobustStd);
+    tfdecomp{c} = bsxfun(@times, tfd, 1./ baselineRobustStd);
 end
 
 freqMasks = false(numFreqs, numFreqBands);
@@ -55,29 +53,16 @@ end
 numTimes = size(tfdecomp{1, 1}, 2);
 
 %% Now assemble the data into a single vector and into bands
-tfs = zeros(numFreqs*numTimes, numChans, numTypes);
-tfsBands = zeros(numTimes, numChans, numTypes, numFreqBands);
-for m = 1:numTypes
-    for c = 1:numChans
-        tf = tfdecomp{c, m};
-        tfs(:, c, m) = tf(:);
-        for f = 1:numFreqBands
-            tfsBands(:, c, m, f) = mean(tf(freqMasks(:, f), :), 1);
-        end
+tfs = zeros(numFreqs, numTimes, numChans);
+tfsBands = zeros(numTimes, numChans, numFreqBands);
+for c = 1:numChans
+    tf = tfdecomp{c};
+    tfs(:,:, c) = tf;
+    for f = 1:numFreqBands
+        tfsBands(:, c, f) = mean(tf(freqMasks(:, f), :), 1);
     end
 end
 
-%% Compute the average spectra
-spectrogramRecs(k).frequencies = freqs;
-spectrogramRecs(k).scales = scales;
-
-%% Compute the correlations
-spectra= reshape(tfs, numTimes*numFreqs*numChans, numTypes);
-spectrogramRecs(k).correlations = corr(spectra);
-bandCorrelations = cell(numFreqBands, 1);
-spectraBands = reshape(tfsBands, numTimes*numChans, numTypes, numFreqBands);
-for f = 1:numFreqBands
-    bandCorrelations{f} = corr(squeeze(spectraBands(:, :, f)));
-end
-spectrogramRecs(k).bandCorrelations = bandCorrelations;
-
+spectralPrint = tfs;
+bandPrints = tfsBands;
+%
