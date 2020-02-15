@@ -3,7 +3,8 @@
 %% Set up the general processing parameters
 dataDirIn = 'D:\Research\EEGPipelineProject\dataIn';
 dataDirOut = 'D:\Research\EEGPipelineProject\dataOut';
-eegFile = 'speedControlSession1Subj2015Rec1.set';
+%eegFile = 'speedControlSession1Subj2015Rec1.set';
+eegFile = 'trafficComplexitySession1Subj2002Rec1.set';
 algorithm = 'ASRalt';
 maxSamplingRate = 128;
 highPassFrequency = 1.5;
@@ -126,7 +127,7 @@ for i=1:size(EEGLowpassed.data, 1)
         - median(EEGLowpassed.data(i,:), 2))) * 1.4826;
 end
 amplitudeInfoBefore.channelRobustStd = channelRobustStd;
-EEG.etc.amplitudeInfoBeforeLARG = amplitudeInfoBefore;
+EEG.etc.amplitudeInfoBefore = amplitudeInfoBefore;
 clear EEGLowPassed;
 
 %% Use subspace removal to remove the artifacts
@@ -144,10 +145,10 @@ for i = 1:size(EEGLowpassed.data, 1)
 end
 amplitudeInfo.channelRobustStd = channelRobustStd;
 amplitudeInfo.custom.sourceDataRecordingId = EEG.etc.dataRecordingUuid;
-EEG.etc.amplitudeInfoAfterLARG = amplitudeInfo;
+EEG.etc.amplitudeInfoAfter = amplitudeInfo;
 clear EEGLowpassed;
 
 %% Now save the files
-outName = [dataDirOut filesep theName '_' algorithm];
+outName = [dataDirOut filesep theName '_' algorithm '_' num2str(burstCriterion)];
 pop_saveset(EEG, 'filename', [outName '.set'], 'version', '7.3');
 save([outName '_blinkInfo.mat'], 'blinkInfo', '-v7.3');

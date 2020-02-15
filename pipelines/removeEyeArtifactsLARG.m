@@ -14,6 +14,8 @@ function [EEG, removalInfo] = removeEyeArtifactsLARG(EEG, blinkInfo, ...
 %      regressBlinkEvents  if true, blink events are regressed out
 %      regressBlinkSignal  if true, blink signal is regressed out
 %
+% Currently regressing out blink events and blink signal are not available.
+% The current implementation just subtracts out the blink signal.
 
 %% Run ICA if needed and perform eyeCatch to remove bad ICS
 removalInfo = [];
@@ -40,20 +42,10 @@ end
 %% Now regress out blink information if requested
 if ~isempty(blinkInfo)
     if regressBlinkEvents
-        obj = TemporalOverlapDesignOfEEG;
-        obj = obj.createFromEEGStructure(EEG, 'eventCodes' , {'leftBase'    'leftZero'    'leftZeroHalfHeight'    'maxFrame'    'rightBase'    'rightZero'    'rightZeroHalfHeight'}...
-            ,'addConstantScalar', true, 'useAllFrames', true, 'includeRampFactor', false, 'timeRange', [-1 1]);
-        
+        warning('Regressing out blink events is currently not implemented for LARG');
         if regressBlinkSignal
-            blinkSignalFactor = TemporalRegressionFactor;
-            blinkSignalFactor.designMatrix = sparse(blinkInfo.blinkSignal(:));
-            blinkSignalFactor.label = 'blink signal';
-            
-            obj = obj.addFactor(blinkSignalFactor, true);
+             warning('Regressing out blink signal is currently not implemented for LARG');
         end
-        [obj, lowlevelResults] = obj.computeFactorValues(EEG.data', 'significance', false, 'outlierMask', []);
-        predictedData = obj.designMatrix * lowlevelResults.factorCoefficients;
-        EEG.data = EEG.data - predictedData';
     elseif ~isempty(blinkInfo.blinkSignal)
         x = EEG.data / blinkInfo.blinkSignal;
         EEG.data = EEG.data - x * blinkInfo.blinkSignal;

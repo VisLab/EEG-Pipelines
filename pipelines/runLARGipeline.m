@@ -122,7 +122,7 @@ for i=1:size(EEGLowpassed.data, 1)
         - median(EEGLowpassed.data(i,:), 2))) * 1.4826;
 end
 amplitudeInfoBefore.channelRobustStd = channelRobustStd;
-EEG.etc.amplitudeInfoBeforeLARG = amplitudeInfoBefore;
+EEG.etc.amplitudeInfoBefore = amplitudeInfoBefore;
 clear EEGLowPassed;
 
 %% Remove eye artifact and blink activity from time-domain (uses EyeCatch)
@@ -142,7 +142,7 @@ for i = 1:size(EEGLowpassed.data, 1)
 end
 amplitudeInfo.channelRobustStd = channelRobustStd;
 amplitudeInfo.custom.sourceDataRecordingId = EEG.etc.dataRecordingUuid;
-EEG.etc.amplitudeInfoAfterLARG = amplitudeInfo;
+EEG.etc.amplitudeInfoAfter = amplitudeInfo;
 clear EEGLowpassed;
 
 %% Now save the files

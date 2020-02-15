@@ -119,7 +119,7 @@ for i=1:size(EEGLowpassed.data, 1)
         - median(EEGLowpassed.data(i,:), 2))) * 1.4826;
 end
 amplitudeInfo.channelRobustStd = channelRobustStd;
-EEG.etc.amplitudeInfoBeforeMARA = amplitudeInfo;
+EEG.etc.amplitudeInfoBefore = amplitudeInfo;
 clear EEGLowpassed;
 
 %% Remove eye artifact and blink activity from time-domain using MARA
@@ -139,7 +139,7 @@ for i = 1:size(EEGLowpassed.data, 1)
 end
 amplitudeInfo.channelRobustStd = channelRobustStd;
 amplitudeInfo.custom.sourceDataRecordingId = EEG.etc.dataRecordingUuid;
-EEG.etc.amplitudeInfoAfterMARA = amplitudeInfo;
+EEG.etc.amplitudeInfoAfter = amplitudeInfo;
 
 %% Now save the files
 outName = [dataDirOut filesep theName '_' algorithm];

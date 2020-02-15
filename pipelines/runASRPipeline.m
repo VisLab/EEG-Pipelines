@@ -5,7 +5,7 @@ dataDirIn = 'D:\Research\EEGPipelineProject\dataIn';
 dataDirOut = 'D:\Research\EEGPipelineProject\dataOut';
 eegFile = [dataDirIn filesep 'speedControlSession1Subj2015Rec1.set'];
 algorithm = 'ASR';
-burstCriterion = 5;
+burstCriterion = 10;
 maxSamplingRate = 128;
 highPassFrequency = [];  % Let ASR clean_artifacts do its own filtering
 capType = '';
@@ -98,7 +98,7 @@ for i=1:size(EEGLowpassed.data, 1)
                           - median(EEGLowpassed.data(i,:), 2))) * 1.4826;
 end
 amplitudeInfo.channelRobustStd = channelRobustStd;
-EEG.etc.amplitudeInfoBeforeASR = amplitudeInfo;
+EEG.etc.amplitudeInfoBefore = amplitudeInfo;
 clear EEGLowpassed;
 
 %% Now compute ASR
@@ -119,6 +119,9 @@ if interpolateBadChannels && length(EEG.chanlocs) ~= length(chanlocsOriginal)
     EEG.etc.interpolatedChannels = interpolatedChannels; 
 end
 
+%% Average reverence the data
+EEG.data = bsxfun(@subtract, EEG.data, mean(EEG.data, 2));
+
 %% Now compute the amplitude vectors after ASR for future reference
 fprintf('Computing channel amplitudes after ASR ...\n');
 EEGLowpassed = pop_eegfiltnew(EEG, [], 20); % lowpassed at 20 Hz
@@ -131,10 +134,10 @@ for i = 1:size(EEGLowpassed.data, 1)
 end
 amplitudeInfo.channelRobustStd = channelRobustStd;
 amplitudeInfo.custom.sourceDataRecordingId = EEG.etc.dataRecordingUuid;
-EEG.etc.amplitudeInfoAfterASR = amplitudeInfo;
+EEG.etc.amplitudeInfoAfter = amplitudeInfo;
 
 %% Now save the files
 [thePath, theName, theExt] = fileparts(eegFile);
-outName = [dataDirOut filesep theName '_' algorithm];
+outName = [dataDirOut filesep theName '_' algorithm '_' num2str(burstCriterion)];
 pop_saveset(EEG, 'filename', [outName '.set'], 'version', '7.3');
 save([outName '_blinkInfo.mat'], 'blinkInfo', '-v7.3');

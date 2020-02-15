@@ -4,31 +4,21 @@
 scriptFile = mfilename('fullpath');
 [scriptFolder, scriptName] = fileparts(scriptFile);
 addpath(scriptFolder);
+
+%% Add the path for utilities
 thisPath = [scriptFolder filesep 'utilities'];
 addpath(genpath(thisPath));
 
-%% Add paths for ASR
-thisPath = [scriptFolder filesep 'ASR'];
+%% Add paths for the pipelines
+thisPath = [scriptFolder filesep 'pipelines'];
 addpath(genpath(thisPath));
 
-%% Add paths for ASRalt
-thisPath = [scriptFolder filesep 'ASRalt'];
+%% Add paths for analysis scripts
+thisPath = [scriptFolder filesep 'analysis'];
 addpath(genpath(thisPath));
 
-%% Add paths for LARG
-thisPath = [scriptFolder filesep 'LARG'];
-addpath(genpath(thisPath));
-
-%% Add paths for MARA
-thisPath = [scriptFolder filesep 'MARA'];
-addpath(genpath(thisPath));
-
-%% Add paths to utilities
-thisPath = [scriptFolder filesep 'utilities'];
-addpath(genpath(thisPath));
-
-%% Add paths for eye-catch
+%% Eye catch paths
 eyeCatchPath = 'D:\Research\EEGPipelineProject\eye-catch';
 addpath(eyeCatchPath);
-addpath(genpath([thisPath filesep 'document']));
-addpath(genpath([thisPath filesep 'unit_test']));
+addpath(genpath([eyeCatchPath filesep 'document']));
+addpath(genpath([eyeCatchPath filesep 'unit_test']));

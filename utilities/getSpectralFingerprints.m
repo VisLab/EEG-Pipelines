@@ -1,5 +1,5 @@
 %% Create the random spectral points for the common channels
-function [spectralPrint, bandPrints] = getSpectralFingerprint(EEG, channels,  ...
+function [spectralPrint, bandPrints] = getSpectralFingerprints(EEG, channels,  ...
                                     numFreqs, freqRange, freqBands)
 %% Compute EEG spectral fingerprint and spectral band fingerprints
 %
@@ -15,14 +15,14 @@ function [spectralPrint, bandPrints] = getSpectralFingerprint(EEG, channels,  ..
 %% Parameters
 wname = 'cmor1-1.5';
 numFreqBands = size(freqBands, 1);
-
+numChans = length(channels);
 %% Initialize fingerprints and check channels are all there
 spectralPrint = [];
 bandPrints = [];
 [EEGNew, missing] = selectEEGChannels(EEG, channels);
 if ~isempty(missing)
     warning('EEG is missing channels %s\n-- can not compute spectral fingerprints', ...
-            getListString(missing));
+            getListString(missing, ','));
     return;
 end
 numChannels = length(channels);
