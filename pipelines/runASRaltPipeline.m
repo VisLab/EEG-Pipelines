@@ -15,7 +15,7 @@ blinkEventsToAdd = {'maxFrame', 'leftZero', 'rightZero', 'leftBase', ...
                    'rightBase', 'leftZeroHalfHeight', 'rightZeroHalfHeight'};
                
 %% Parameter settings specific for ASR
-burstCriterion = 5;
+burstCriterion = 10;
 
 %% Make sure output directory exists
 if ~exist(dataDirOut, 'dir')

@@ -1,4 +1,4 @@
-function [EEGNew, missing] = selectEEGChannels(EEG, channels)
+function [EEGNew, missing, selectMask] = selectEEGChannels(EEG, channels)
 %% Creates a new EEG structure with only channels (in order specified)
 %
 %  Parameters:
@@ -9,14 +9,14 @@ function [EEGNew, missing] = selectEEGChannels(EEG, channels)
 
 %% Create the new EEG structure containing only specified channels
 myLabels = {EEG.chanlocs.labels};
-[commonChannels, ~, iy2] = intersect(channels, myLabels, 'stable');
+[commonChannels, ~, selectMask] = intersect(channels, myLabels, 'stable');
 if length(commonChannels) ~= length(channels)
     missing = setdiff(channels, commonChannels);
 else
     missing = '';
 end
 EEGNew = EEG;
-EEGNew.chanlocs = EEGNew.chanlocs(iy2);
-EEGNew.data = EEGNew.data(iy2, :);
+EEGNew.chanlocs = EEGNew.chanlocs(selectMask);
+EEGNew.data = EEGNew.data(selectMask, :);
 EEGNew.nbchan = length(EEGNew.chanlocs);
    
