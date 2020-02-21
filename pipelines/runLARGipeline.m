@@ -1,10 +1,15 @@
 %% This script runs the LARG pipeline on an EEG.set file. The full blink
 % regression is not available at this time.
 
-%% Set up the general processing parameters
+%% Set up the directories and file names
 dataDirIn = 'D:\Research\EEGPipelineProject\dataIn';
 dataDirOut = 'D:\Research\EEGPipelineProject\dataOut';
-eegFile = 'speedControlSession1Subj2015Rec1.set';
+%eegFile = 'basicGuardSession3Subj3202Rec1.set';
+%eegFile = 'dasSession16Subj131004Rec1.set';
+%eegFile = 'speedControlSession1Subj2015Rec1.set';
+eegFile = 'trafficComplexitySession1Subj2002Rec1.set';
+
+%% Set up the parameters for the algorithm
 algorithm = 'LARG';
 maxSamplingRate = 128;
 highPassFrequency = 1.0;

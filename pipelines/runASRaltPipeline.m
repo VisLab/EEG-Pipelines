@@ -3,6 +3,8 @@
 %% Set up the general processing parameters
 dataDirIn = 'D:\Research\EEGPipelineProject\dataIn';
 dataDirOut = 'D:\Research\EEGPipelineProject\dataOut';
+%eegFile = 'basicGuardSession3Subj3202Rec1.set';
+%eegFile = 'dasSession16Subj131004Rec1.set';
 %eegFile = 'speedControlSession1Subj2015Rec1.set';
 eegFile = 'trafficComplexitySession1Subj2002Rec1.set';
 algorithm = 'ASRalt';
@@ -15,7 +17,7 @@ blinkEventsToAdd = {'maxFrame', 'leftZero', 'rightZero', 'leftBase', ...
                    'rightBase', 'leftZeroHalfHeight', 'rightZeroHalfHeight'};
                
 %% Parameter settings specific for ASR
-burstCriterion = 10;
+burstCriterion = 5;
 
 %% Make sure output directory exists
 if ~exist(dataDirOut, 'dir')

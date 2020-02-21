@@ -79,13 +79,13 @@ hFig6 = makeBlinkRatioBoxPlot(nonBlinkPowerRatios, methodNames, ...
             channelLabels, theTitle, theType, dataLimits, f);
 
 %% Now plot boxplots of ERP blink ratios
-dataLimits = [0, 20];
+dataLimits = [0, 10];
 theTitle = {'Blink ERP power ratio for preprocessing methods'; EEGBaseFile};
 theType = 'ERP power ratio';
 f = [];
 hFig7 = makeBlinkRatioBoxPlot(erpBlinkPowerRatio, methodNames, ...
             channelLabels, theTitle, theType, dataLimits, f);
-dataLimits = [0, 20];
+dataLimits = [0, 10];
 theTitle = {'Non blink ERP power ratio for preprocessing methods'; EEGBaseFile};
 theType = 'ERP power ratio';
 hFig8 = makeBlinkRatioBoxPlot(nonBlinkErpPowerRatio, methodNames, ...

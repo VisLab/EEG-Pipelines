@@ -1,13 +1,17 @@
-%% This script runs the standard ASR pipeline the specified EEG file
+%% This script runs the standard ASR pipeline on the specified EEG.set file
 
-%% Set up the parameters
+%% Set up the directories and file names
 dataDirIn = 'D:\Research\EEGPipelineProject\dataIn';
 dataDirOut = 'D:\Research\EEGPipelineProject\dataOut';
-eegFile = [dataDirIn filesep 'speedControlSession1Subj2015Rec1.set'];
+%eegFile = 'basicGuardSession3Subj3202Rec1.set';
+eegFile = 'dasSession16Subj131004Rec1.set';
+%eegFile = 'speedControlSession1Subj2015Rec1.set';
+%eegFile = 'trafficComplexitySession1Subj2002Rec1.set';
+
+%% Set up the parameters for the algorithm
 algorithm = 'ASR';
 burstCriterion = 10;
 maxSamplingRate = 128;
-highPassFrequency = [];  % Let ASR clean_artifacts do its own filtering
 capType = '';
 blinkEventsToAdd = {'maxFrame', 'leftZero', 'rightZero', 'leftBase', ...
                    'rightBase', 'leftZeroHalfHeight', 'rightZeroHalfHeight'};
@@ -20,10 +24,11 @@ end
 
 %% EEG options: no ICA activations, use double precision, and use a single file
 pop_editoptions('option_single', false, 'option_savetwofiles', false, ...
-    'option_computeica', false);
+                'option_computeica', false);
 
 %% Load the EEG file
-EEG = pop_loadset(eegFile);
+[thePath, theName, theExt] = fileparts(eegFile);
+EEG = pop_loadset([dataDirIn filesep eegFile]);
 
 %% Make sure it has a dataRecordingUuid for identification downstream
 if ~isfield(EEG.etc, 'dataRecordingUuid') || isempty(EEG.etc.dataRecordingUuid)
@@ -50,8 +55,8 @@ elseif size(EEG.data > 64, 1)
     warning('The original LARG pipeline remapped to 64 channels in 10-20 config');
 end
 
-%% Remove channel mean, filter, and resample if necessary
-EEG = filterAndResample(EEG, highPassFrequency, maxSamplingRate);
+%% Remove channel meanand resample if necessary
+EEG = filterAndResample(EEG, [], maxSamplingRate);
 
 %% Now run Blinker to insert blink events
 fprintf('Detecting and adding blink events...\n');
@@ -119,8 +124,8 @@ if interpolateBadChannels && length(EEG.chanlocs) ~= length(chanlocsOriginal)
     EEG.etc.interpolatedChannels = interpolatedChannels; 
 end
 
-%% Average reverence the data
-EEG.data = bsxfun(@subtract, EEG.data, mean(EEG.data, 2));
+%% Average reference the data
+EEG.data = bsxfun(@minus, EEG.data, mean(EEG.data, 2));
 
 %% Now compute the amplitude vectors after ASR for future reference
 fprintf('Computing channel amplitudes after ASR ...\n');
@@ -137,7 +142,6 @@ amplitudeInfo.custom.sourceDataRecordingId = EEG.etc.dataRecordingUuid;
 EEG.etc.amplitudeInfoAfter = amplitudeInfo;
 
 %% Now save the files
-[thePath, theName, theExt] = fileparts(eegFile);
 outName = [dataDirOut filesep theName '_' algorithm '_' num2str(burstCriterion)];
 pop_saveset(EEG, 'filename', [outName '.set'], 'version', '7.3');
 save([outName '_blinkInfo.mat'], 'blinkInfo', '-v7.3');

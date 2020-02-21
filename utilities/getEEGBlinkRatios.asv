@@ -75,3 +75,9 @@ end
 %% Now compute power ratios of erp (averaged)
 [erpBlinkPowerRatio, erpBlinkAmpRatio] =  getBlinkRatio(blinkErp, tValues, inRange, outRange);
 [nonBlinkErpPowerRatio, nonBlinkErpAmpRatio] = getBlinkRatio(nonBlinkErp, tValues, inRange, outRange);
+[nonBlinkErpPowerRatio, nonBlinkErpAmpRatio] = 
+    [nonBlinkPowerRatios(:, b), nonBlinkAmpRatios(:, b)] = ...
+        getBlinkRatio(signal, tValues, inRange, outRange);
+
+          erpBlinkPowerRatio, nonBlinkErpPowerRatio, ...
+           erpBlinkAmpRatio, nonBlinkErpAmpRatio] 
