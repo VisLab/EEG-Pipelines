@@ -1,16 +1,18 @@
 %% Plot the robust amplitudes before and after pipeline as scalp maps
 
-%% Set up the data
+%% Set up the file names and which methods
 dataDir = 'D:\Research\EEGPipelineProject\dataOut';
-EEGBaseFile = 'speedControlSession1Subj2015Rec1';
-%methodNames = {'LARG', 'MARA', 'ASR_10', 'ASRalt_10', 'ASR_5', 'ASRalt_5'};
-methodNames = {'LARG'};
+eegBaseFile = 'basicGuardSession3Subj3202Rec1';
+%eegBaseFile = 'dasSession16Subj131004Rec1';
+%eegBaseFile = 'speedControlSession1Subj2015Rec1';
+%eegBaseFile = 'trafficComplexitySession1Subj2002Rec1';
+methodNames = {'LARG', 'MARA', 'ASR_10', 'ASRalt_10', 'ASR_5', 'ASRalt_5'};
 numMethods = length(methodNames);
 
 %% Read in the files
 eegs = cell(numMethods, 1);
 for m = 1:numMethods
-    fileName = [dataDir filesep EEGBaseFile '_' methodNames{m} '.set'];
+    fileName = [dataDir filesep eegBaseFile '_' methodNames{m} '.set'];
     eegs{m} = pop_loadset(fileName);
 end
 

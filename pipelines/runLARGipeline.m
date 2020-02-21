@@ -75,7 +75,7 @@ EEG = prepPipeline(EEG, params);
 
 %% If a reduction of channels (only Biosemi256 to Biosemi64 is supported)
 if strcmpi(capType, 'Biosemi256')
-    EEG = convertEEGFromBiosemi256ToB64(EEG, capType, false);
+    EEG = convertEEGFromBiosemi256ToB64(EEG);
     warning('Converting from Biosemi256 to Biosemi64: %s', fileName);
 elseif size(EEG.data > 64, 1)
     warning('The original LARG pipeline remapped to 64 channels in 10-20 config');

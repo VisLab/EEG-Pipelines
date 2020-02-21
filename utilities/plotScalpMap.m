@@ -17,6 +17,6 @@ cb = colorbar;
 set(cb, 'fontsize', 12);
 set(h1Fig, 'Position', [440, 345, 420, 242]);
 if ~isempty(theTitle)
-   title(figTitle)
+   title(figTitle, 'Interpreter', 'None')
 end
 set(h1Fig, 'renderer', 'painter');

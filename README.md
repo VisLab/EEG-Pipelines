@@ -3,9 +3,8 @@
 
 This repository holds several pipelines which were used to benchmark how
 much differences in EEG preprocessing affect downstream results as reported
-the following paper. 
+the following paper: 
 
-How to cite:
 > How sensitive are EEG results to preprocessing methods: A Benchmarking study  
 > Kay A. Robbins, Jonathan Touryan, Tim Mullen, Christian Kothe, Nima Bigdely-Shamlo  
 > bioRxiv 2020.01.20.913327; doi: https://doi.org/10.1101/2020.01.20.913327 
@@ -21,7 +20,7 @@ to set thresholds. ASR needs data to calibrate.  The code was tested on MATLAB
 
 The pipelines are fully automated, once the parameters at the top of 
 each script are set. The supported pipelines are:
-  * LARG uses ICA, Blinker, and eye-catch to identify and remove eye artifacts.
+  * LARG uses ICA, Blinker, and eye-catch to identify and remove eye artifacts. (Note: this implementation allows subtraction of a residual blink signal, but does not currently implement regression out of blinks during preprocessing.)
   * MARA uses ICA and MARA to identify and remove eye artifacts.
   * ASR uses standard application of ASR from raw data (`clean_artifacts`).
   * ASRalt uses PREP for line noise, robust referencing, 
@@ -31,8 +30,7 @@ each script are set. The supported pipelines are:
     (This alternative is not necessarily recommended, but was developed to
      make a closer comparison with LARG and MARA.)
 
-
-## Setup
+The paper used cudaica for some of the computations of ICA. This requires special hardware and setup. That version of the code has not been included in the repository.
 Before running any of these pipelines, you must make sure that you have the following setup.
 Although the stub for using cudaica is included, cudaica has not been included in the
 repository. Thus, ICA options are either runica or binica, unless you set up cudiaca to run
@@ -51,7 +49,7 @@ We also installed the following EEGLAB plugins:
  2. MARA1.2
  3. PrepPipeline0.55.3
 
-By installation, we mean that these plugins are in the EEGLAB/plugin directory.
+By installation, we mean that these plugins are unzipped into the EEGLAB/plugin directory.
 You should add them to your MATLAB path by running eeglab, not by trying to 
 add individual directories to your path.
 

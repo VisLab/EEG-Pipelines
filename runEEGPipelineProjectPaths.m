@@ -17,6 +17,10 @@ addpath(genpath(thisPath));
 thisPath = [scriptFolder filesep 'analysis'];
 addpath(genpath(thisPath));
 
+%% Add paths for analysis scripts
+thisPath = [scriptFolder filesep 'metadata'];
+addpath(genpath(thisPath));
+
 %% Eye catch paths
 eyeCatchPath = 'D:\Research\EEGPipelineProject\eye-catch';
 addpath(eyeCatchPath);
