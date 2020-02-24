@@ -3,16 +3,19 @@
 %% Set up the directories and file names
 dataDirIn = 'D:\Research\EEGPipelineProject\dataIn';
 dataDirOut = 'D:\Research\EEGPipelineProject\dataOut';
-%eegFile = 'basicGuardSession3Subj3202Rec1.set';
-eegFile = 'dasSession16Subj131004Rec1.set';
+eegFile = 'basicGuardSession3Subj3202Rec1.set';
+capType = 'Biosemi256';
+%eegFile = 'dasSession16Subj131004Rec1.set';
+%capType = '';
 %eegFile = 'speedControlSession1Subj2015Rec1.set';
+%capType = '';
 %eegFile = 'trafficComplexitySession1Subj2002Rec1.set';
+%capType = '';
 
 %% Set up the parameters for the algorithm
 algorithm = 'ASR';
 burstCriterion = 10;
 maxSamplingRate = 128;
-capType = '';
 blinkEventsToAdd = {'maxFrame', 'leftZero', 'rightZero', 'leftBase', ...
                    'rightBase', 'leftZeroHalfHeight', 'rightZeroHalfHeight'};
 interpolateBadChannels = true;
@@ -49,8 +52,8 @@ EEG.nbchan = sum(chanMask);
 
 %% If a reduction of channels (only Biosemi256 to Biosemi64 is supported)
 if strcmpi(capType, 'Biosemi256')
-    EEG = convertEEGFromBiosemi256ToB64(EEG, capType, false);
-    warning('Converting from Biosemi256 to Biosemi64: %s', fileName);
+    EEG = convertEEGFromBiosemi256ToB64(EEG, false);
+    warning('Converting from Biosemi256 to Biosemi64');
 elseif size(EEG.data > 64, 1)
     warning('The original LARG pipeline remapped to 64 channels in 10-20 config');
 end
