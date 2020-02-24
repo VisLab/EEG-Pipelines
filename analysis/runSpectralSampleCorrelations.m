@@ -2,15 +2,24 @@
 
 %% Set up the data
 dataDir = 'D:\Research\EEGPipelineProject\dataOut';
-EEGBaseFile = 'speedControlSession1Subj2015Rec1';
+imageDir = 'D:\Research\EEGPipelineProject\dataImages';
+eegBaseFile = 'basicGuardSession3Subj3202Rec1';
+%eegBaseFile = 'dasSession16Subj131004Rec1';
+%eegBaseFile = 'speedControlSession1Subj2015Rec1';
+%eegBaseFile = 'trafficComplexitySession1Subj2002Rec1';
 methodNames = {'LARG', 'MARA', 'ASR_10', 'ASRalt_10', 'ASR_5', 'ASRalt_5'};
 numMethods = length(methodNames);
 useLogSpectra = false;
 
+%% Specify the formats in which to save the data
+%figureFormats = {'.png', 'png'; '.fig', 'fig'; '.pdf' 'pdf'; '.eps', 'epsc'};
+figureFormats = {'.png', 'png'};
+figureClose = false;
+
 %% Read in the files
 eegs = cell(numMethods, 1);
 for m = 1:numMethods
-    fileName = [dataDir filesep EEGBaseFile '_' methodNames{m} '.set'];
+    fileName = [dataDir filesep eegBaseFile '_' methodNames{m} '.set'];
     eegs{m} = pop_loadset(fileName);
 end
 
@@ -84,14 +93,22 @@ end
 %% Now spectral samples as a box plot
 boxValues = reshape(correlations, numChans*numSpectra, numCombos);
 [boxValues, boxLabels] = reformatBoxPlotData(boxValues, comboNames);
-theTitle = {'Spectral sample correlation by method:'; EEGBaseFile};
+theTitle = {'Spectral sample correlation by method:'; eegBaseFile};
 hFig = makeGroupBoxPlot(boxValues, boxLabels, theTitle, comboNames);
+if ~isempty(imageDir)
+    baseFile = [imageDir filesep 'SpectralSampleCorr_' eegBaseFile];
+    saveFigures(hFig, baseFile, figureFormats, figureClose);
+end
 
 %% Now plot the spectral bands as a box plot
 hFigs = cell(numBands, 1);
 for b = 1:numBands
     boxValues = squeeze(correlations(:, b, :));
     [boxValues, boxLabels] = reformatBoxPlotData(boxValues, comboNames);
-    theTitle = {[bandNames{b} ' band correlation by method:']; EEGBaseFile};
+    theTitle = {[bandNames{b} ' band correlation by method:']; eegBaseFile};
     hFigs{b} = makeGroupBoxPlot(boxValues, boxLabels, theTitle, comboNames);
+    if ~isempty(imageDir)
+        baseFile = [imageDir filesep 'SpectralSampleCorr_' bandNames{b} '_' eegBaseFile];
+        saveFigures(hFigs{b}, baseFile, figureFormats, figureClose);
+    end
 end
