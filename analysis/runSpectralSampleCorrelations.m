@@ -3,9 +3,9 @@
 %% Set up the data
 dataDir = 'D:\Research\EEGPipelineProject\dataOut';
 imageDir = 'D:\Research\EEGPipelineProject\dataImages';
-eegBaseFile = 'basicGuardSession3Subj3202Rec1';
+%eegBaseFile = 'basicGuardSession3Subj3202Rec1';
 %eegBaseFile = 'dasSession16Subj131004Rec1';
-%eegBaseFile = 'speedControlSession1Subj2015Rec1';
+eegBaseFile = 'speedControlSession1Subj2015Rec1';
 %eegBaseFile = 'trafficComplexitySession1Subj2002Rec1';
 methodNames = {'LARG', 'MARA', 'ASR_10', 'ASRalt_10', 'ASR_5', 'ASRalt_5'};
 numMethods = length(methodNames);
