@@ -1,4 +1,4 @@
-function [EEG, chanMap] = convertEEGFromBiosemi256ToB64(EEG)
+function [EEG, chanMap] = convertEEGFromBiosemi256ToB64(EEG, overwriteLocs)
 %% Convert 256 channel Biosemi EEG to 64 channels using Biosemi 64 channel map
 %
 % Parameters:
