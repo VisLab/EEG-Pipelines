@@ -2,6 +2,7 @@
 
 %% Set up the file names and which methods
 dataDir = 'D:\Research\EEGPipelineProject\dataOut';
+imageDir = 'D:\Research\EEGPipelineProject\dataImages';
 eegBaseFile = 'basicGuardSession3Subj3202Rec1';
 %eegBaseFile = 'dasSession16Subj131004Rec1';
 %eegBaseFile = 'speedControlSession1Subj2015Rec1';
@@ -9,6 +10,10 @@ eegBaseFile = 'basicGuardSession3Subj3202Rec1';
 methodNames = {'LARG', 'MARA', 'ASR_10', 'ASRalt_10', 'ASR_5', 'ASRalt_5'};
 numMethods = length(methodNames);
 
+%% Specify the formats in which to save the data
+%figureFormats = {'.png', 'png'; '.fig', 'fig'; '.pdf' 'pdf'; '.eps', 'epsc'};
+figureFormats = {'.png', 'png'};
+figureClose = false;
 %% Read in the files
 eegs = cell(numMethods, 1);
 for m = 1:numMethods
@@ -42,4 +47,6 @@ for m = 1:numMethods
     hFigsAfter{m} = plotScalpMap(afterValues, EEG.chanlocs, afterTitle, axisLimits, ...
         theColorMap, electrodeFlag);
     
+    baseFile = [imageDir filesep 'channelAmplitude_' methodNames{m}];
+    saveFigures(h1Fig, baseFile, figureFormats, figureClose);  
 end

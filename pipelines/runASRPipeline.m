@@ -14,7 +14,7 @@ capType = 'Biosemi256';
 
 %% Set up the parameters for the algorithm
 algorithm = 'ASR';
-burstCriterion = 10;
+burstCriterion = 5;
 maxSamplingRate = 128;
 blinkEventsToAdd = {'maxFrame', 'leftZero', 'rightZero', 'leftBase', ...
                    'rightBase', 'leftZeroHalfHeight', 'rightZeroHalfHeight'};
