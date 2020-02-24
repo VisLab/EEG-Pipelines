@@ -3,10 +3,10 @@
 %% Set up the file names and which methods
 dataDir = 'D:\Research\EEGPipelineProject\dataOut';
 imageDir = 'D:\Research\EEGPipelineProject\dataImages';
-eegBaseFile = 'basicGuardSession3Subj3202Rec1';
+%eegBaseFile = 'basicGuardSession3Subj3202Rec1';
 %eegBaseFile = 'dasSession16Subj131004Rec1';
 %eegBaseFile = 'speedControlSession1Subj2015Rec1';
-%eegBaseFile = 'trafficComplexitySession1Subj2002Rec1';
+eegBaseFile = 'trafficComplexitySession1Subj2002Rec1';
 methodNames = {'LARG', 'MARA', 'ASR_10', 'ASRalt_10', 'ASR_5', 'ASRalt_5'};
 numMethods = length(methodNames);
 
@@ -14,6 +14,12 @@ numMethods = length(methodNames);
 %figureFormats = {'.png', 'png'; '.fig', 'fig'; '.pdf' 'pdf'; '.eps', 'epsc'};
 figureFormats = {'.png', 'png'};
 figureClose = false;
+
+%% Make sure that image directory exists
+if ~isempty(imageDir) && ~exist(imageDir, 'dir')
+    mkdir(imageDir);
+end
+
 %% Read in the files
 eegs = cell(numMethods, 1);
 for m = 1:numMethods
@@ -47,6 +53,12 @@ for m = 1:numMethods
     hFigsAfter{m} = plotScalpMap(afterValues, EEG.chanlocs, afterTitle, axisLimits, ...
         theColorMap, electrodeFlag);
     
-    baseFile = [imageDir filesep 'channelAmplitude_' methodNames{m}];
-    saveFigures(h1Fig, baseFile, figureFormats, figureClose);  
+    if ~isempty(imageDir)
+        baseFile = [imageDir filesep 'channelAmplitudeBefore_' methodNames{m} ...
+                   '_' eegBaseFile];
+        saveFigures(hFigsBefore{m}, baseFile, figureFormats, figureClose);
+        baseFile = [imageDir filesep 'channelAmplitudeAfter_' methodNames{m}...
+                   '_' eegBaseFile];
+        saveFigures(hFigsAfter{m}, baseFile, figureFormats, figureClose);
+    end
 end

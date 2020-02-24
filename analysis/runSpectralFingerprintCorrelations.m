@@ -2,14 +2,23 @@
 
 %% Set up the files
 dataDir = 'D:\Research\EEGPipelineProject\dataOut';
-EEGBaseFile = 'speedControlSession1Subj2015Rec1';
+imageDir = 'D:\Research\EEGPipelineProject\dataImages';
+eegBaseFile = 'basicGuardSession3Subj3202Rec1';
+%eegBaseFile = 'dasSession16Subj131004Rec1';
+%eegBaseFile = 'speedControlSession1Subj2015Rec1';
+%eegBaseFile = 'trafficComplexitySession1Subj2002Rec1';
 methodNames = {'LARG', 'MARA', 'ASR_10', 'ASRalt_10', 'ASR_5', 'ASRalt_5'};
 numMethods = length(methodNames);
+
+%% Specify the formats in which to save the data
+%figureFormats = {'.png', 'png'; '.fig', 'fig'; '.pdf' 'pdf'; '.eps', 'epsc'};
+figureFormats = {'.png', 'png'};
+figureClose = false;
 
 %% Read in the files
 eegs = cell(numMethods, 1);
 for m = 1:numMethods
-    fileName = [dataDir filesep EEGBaseFile '_' methodNames{m} '.set'];
+    fileName = [dataDir filesep eegBaseFile '_' methodNames{m} '.set'];
     eegs{m} = pop_loadset(fileName);
 end
 
