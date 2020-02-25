@@ -3,13 +3,15 @@
 
 This repository holds several pipelines which were used to benchmark how
 much differences in EEG preprocessing affect downstream results as reported
-the following paper: 
+in the following paper: 
 
 > How sensitive are EEG results to preprocessing methods: A Benchmarking study  
 > Kay A. Robbins, Jonathan Touryan, Tim Mullen, Christian Kothe, Nima Bigdely-Shamlo  
 > bioRxiv 2020.01.20.913327; doi: https://doi.org/10.1101/2020.01.20.913327 
 
-
+## Software requirements and setup
+The pipelines use MATLAB and [EEGLAB](https://sccn.ucsd.edu/eeglab/index.php "EEGLAB homepage"). The code was tested using MATLAB 2019a and EEGLAB v2019.1. The pipelines assume the MATLAB statistics toolbox. Computation of the spectral
+fingerprints and spectral samples assumes the MATLAB wavelet toolbox.
 
 ### Setup of EEGLAB
 The instructions are based on EEGLAB v2019.1 or later. The following
@@ -35,11 +37,10 @@ Add this directory to your path as well.
 ### Add the pipelines to your path by executing:
     runEEGPipelineProjectPaths
 
-### Matlab required toolboxes:
-The pipelines assume the MATLAB statistics toolbox. Computation of the spectral
-fingerprints assumes the MATLAB wavelet toolbox.
 
-## Data preparation
+## Data requirements and preparation
+
+**EEG:** The EEG recording should be in `EEG.set` file format. The recording should be at least 15 minutes in length in order for the pipelines to work effectively, as several of the components (such as PREP and Blinker) use signal statistics to set thresholds. ASR needs data to calibrate. 
 
 **Channel locations:** The input `EEG.set` file MUST have channel locations included. Furthermore, the 
 `EEG.chanlocs.type` fields must be set so that the EEG channels have the
@@ -64,10 +65,7 @@ for more channels.
 The original pipelines were implemented using a code infrastructure
 that supports large-scale processing. The codes in this repository were 
 stripped out of that infrastructure and redesigned to run on a single EEG
-recording file in .set file format. The recording should be at least 15 
-minutes in length in order for the pipelines to work effectively, as several
-of the components (such as PREP and Blinker) use signal statistics
-to set thresholds. ASR needs data to calibrate.  The code was tested on MATLAB
+recording file in .set file format.  The code was tested on MATLAB
 2019a and EEGLAB version eeglab2019_1. 
 
 The pipelines are fully automated, once the parameters at the top of 
@@ -84,9 +82,5 @@ each script are set. The supported pipelines are:
 
 ![Overview of preprocessing pipelines](./metadata/PipelineOverview.png)
 
-The paper used cudaica for some of the computations of ICA. This requires special hardware and setup. That version of the code has not been included in the repository.
-Before running any of these pipelines, you must make sure that you have the following setup.
-Although the stub for using cudaica is included, cudaica has not been included in the
-repository. Thus, ICA options are either runica or binica, unless you set up cudiaca to run
-on your GPU.
+The paper used cudaica for some of the computations of ICA. This requires special hardware and setup. That version of the code has not been included in the repository. We assume runica from EEGLAB for the ICA decomposition.
 
