@@ -10,12 +10,10 @@ in the following paper:
 > bioRxiv 2020.01.20.913327; doi: https://doi.org/10.1101/2020.01.20.913327 
 
 ## Software requirements and setup
-The pipelines use MATLAB and [EEGLAB](https://sccn.ucsd.edu/eeglab/index.php "EEGLAB homepage"). The code was tested using MATLAB 2019a and EEGLAB v2019.1. The pipelines assume the MATLAB statistics toolbox. Computation of the spectral
-fingerprints and spectral samples assumes the MATLAB wavelet toolbox.
+The pipelines use MATLAB and [EEGLAB](https://sccn.ucsd.edu/eeglab/index.php "EEGLAB homepage"). Some of the components use the MATLAB statistics toolbox. Computation of the spectral fingerprints and spectral samples assumes the MATLAB wavelet toolbox. The code was tested using MATLAB 2019a and EEGLAB v2019.1. 
 
 ### Setup of EEGLAB
-The instructions are based on EEGLAB v2019.1 or later. The following
-EEGLAB plugins were installed in the default configuration:
+The following EEGLAB plugins were installed in the default configuration:
  1. clean_rawdata2.1
  2. dipfit
  3. firfilt2.3
@@ -28,15 +26,15 @@ We also installed the following EEGLAB plugins:
 
 By installation, we mean that these plugins are unzipped into the EEGLAB/plugin directory.
 You should add them to your MATLAB path by running eeglab, not by trying to 
-add individual directories to your path.
+add individual directories to your path. We recommend that you always use the latest versions of the plugins.
 
 ### Additional setup
 You will also need go download eye-catch from https://github.com/bigdelys/eye-catch.
-Add this directory to your path as well.
+Add this directory to your path as well. For convenience we have provided a script to add the project to your MATLAB path:
 
-### Add the pipelines to your path by executing:
     runEEGPipelineProjectPaths
 
+The script assumes that the EEG-pipelines repository and the eye-catch repository are installed at the same level under a common subdirectory.
 
 ## Data requirements and preparation
 
@@ -66,21 +64,20 @@ The original pipelines were implemented using a code infrastructure
 that supports large-scale processing. The codes in this repository were 
 stripped out of that infrastructure and redesigned to run on a single EEG
 recording file in .set file format.  The code was tested on MATLAB
-2019a and EEGLAB version eeglab2019_1. 
+2019a and EEGLAB version eeglab2019_1. The paper used cudaica for some of the computations of ICA. This requires special hardware and setup. That version of the code has not been included in the repository. We assume runica from EEGLAB for the ICA decomposition.
 
 The pipelines are fully automated, once the parameters at the top of 
 each script are set. The supported pipelines are:
-  * LARG uses ICA, Blinker, and eye-catch to identify and remove eye artifacts. (Note: this implementation allows subtraction of a residual blink signal, but does not currently implement regression out of blinks during preprocessing.)
-  * MARA uses ICA and MARA to identify and remove eye artifacts.
+  * LARG uses PREP, ICA, Blinker, and eye-catch to identify and remove artifacts. (Note: this implementation allows subtraction of a residual blink signal, but does not currently implement regression out of blinks during preprocessing.)
+  * MARA uses PREP, ICA and MARA to identify and remove artifacts.
   * ASR uses standard application of ASR from raw data (`clean_artifacts`).
-  * ASRalt uses PREP for line noise, robust referencing, 
+  * ASRalt (referred to in the paper and in the diagram below as ASR*) uses PREP for line noise, robust referencing, 
     and bad channel identification and Hamming windows for filtering (as the
     LARG and MARA pipelines do). It then uses only the artifact subspace 
-    removal portion of ASR (`clean_asr`) to remove artifacts.
-    (This alternative is not necessarily recommended, but was developed to
+    removal portion of ASR (`clean_asr`) to remove artifacts. (This alternative is not necessarily recommended, but was developed to
      make a closer comparison with LARG and MARA.)
 
 ![Overview of preprocessing pipelines](./metadata/PipelineOverview.png)
 
-The paper used cudaica for some of the computations of ICA. This requires special hardware and setup. That version of the code has not been included in the repository. We assume runica from EEGLAB for the ICA decomposition.
+
 
